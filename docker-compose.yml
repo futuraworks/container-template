@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  domain:
+    image: reg/img:latest
+    networks:
+    # change this network based on your docker network
+      - gateway
+    deploy:
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.domain.entrypoints=http"
+          - "traefik.http.routers.domain.rule=Host(`domain.name`)"
+          - "traefik.http.middlewares.domain-https-redirect.redirectscheme.scheme=https"
+          - "traefik.http.routers.domain.middlewares=domain-https-redirect"
+          - "traefik.http.routers.domain-secure.entrypoints=https"
+          - "traefik.http.routers.domain-secure.rule=Host(`domain.name`)"
+          - "traefik.http.routers.domain-secure.tls=true"
+          - "traefik.http.routers.domain-secure.tls.certresolver=http"
+          - "traefik.http.routers.domain-secure.service=domain"
+          # here change the port of container
+          - "traefik.http.services.domain.loadbalancer.server.port=80"
+          - "traefik.docker.network=gateway"
+
+# define network name
+networks:
+  gateway:
+    external: true
+
